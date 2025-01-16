@@ -317,3 +317,13 @@ _Performance(Cacheline size) = e * Cacheline Size_
 
 Εξετάστηκαν διάφορα προγράμματα στον προσομοιωτή gem5. Εξήχθησαν αποτελέσματα από τις προσομοιώσεις για εξαγωγή συμπερασμάτων. Κατασκευάστηκαν βοηθητικά scripts για αυτοματοποίηση της δουλείας.  
 Εξετάστηκαν διάφορα configurations και η απόδοση αυτών. Τέλος, εξήχθησαν θεωρητικά συμπεράσματα με βάση τα αποτελέσματα των προσομοιώσεων.
+
+## References
+
+Lowe-Power, J. (2025, January 13). gem5: gem5 documentation. gem5: The gem5 simulator system. https://www.gem5.org/documentation/
+
+Tousi, A. (2017). Research Starter Kit System Modeling using gem5. (p. 6). Arm Research. https://old.gem5.org/wiki/images/c/cf/Summit2017_starterkit.pdf
+
+SPEC Organization. (2024, November 25). Standard Performance Evaluation Corporation. Standard Performance Evaluation Corporation. https://www.spec.org/cpu2006/
+
+Smith, K. (2025). How The Cache Memory Works - Hardware Secrets. Hardware Secrets. https://hardwaresecrets.com/how-the-cache-memory-works/
