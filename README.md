@@ -1,19 +1,19 @@
 # Αναφορά GEM5
-## Αρχιτεκτονική Υπολογιστών
-## Αποστόλης Σταυρόπουλος 10177
-## apostolgs@ece.auth.gr
+### Αρχιτεκτονική Υπολογιστών
+#### Αποστόλης Σταυρόπουλος 10177
+#### apostolgs@ece.auth.gr
 
-### Εισαγωγή
+## Εισαγωγή
 
 Θα χρησιμοποιηθεί έτοιμο Virtual Machine (VM) για την εκπόνηση της παρούσας εργασίας. Θα χρησιμοποιειθεί ο GEM5 προσομοιωτής για την εξαγωγή συμπερασμάτων από προσομοιώσεις benchmark.
 Θα δοθούν αποτελέσματα προσομοιώσεων και επεξήγηση αυτών. Επιπλέον, θα δοθούν και όσα βοηθητικά scripts θα χρησιμοποιηθούν για αυτοματοποίηση και συλλογή αποτελεσμάτων.
 
-### Πρώτο μέρος
+## Πρώτο μέρος
 
 Στο πρώτο μέρος θα γίνει προσομοίωση σε απλά προγράμματα. Αρχικά θα γίνει προσομοίωση σε έτοιμο πρόγραμμα hello_world. Έπειτα θα γραφτεί πρόγραμμα που κατασκευάζει σειρά Fibonacci
 για έλεγχο.
 
-#### Προσομοίωση προγράμματος hello_world
+### Προσομοίωση προγράμματος hello_world
 
 Τύπος CPU : Minor
 Συχνότητα Λειτουργίας : 2GHz
@@ -86,7 +86,10 @@ Caches : 2 Levels
 | 3GHz | 0.000043 | - |
 | DDR4_2400_8x8 | 0.000050  | - |
 
-### Δεύτερο Μέρος
+Από τα παραπάνω, φαίνεται πως στο MinorCPU μοντέλο, η αύξηση του CPU clock speed βελτίωσε το simulation time ωστόσο χειροτέρεψε το CPI. Αυτό είναι αναμενόμενο καθώς σε κάθε κύκλο ο επεξεργαστής έχει λιγότερο χρόνο για να εκτελέσει instructions. 
+Συνεπώς, μειώθηκε η απόδοση του επεξεργαστή. Το TimingSimpleCPU βλέπουμε πως έχει γενικά χειρότερο χρόνο εκτέλεσης από το MinorCPU μοντέλο. Αυτό είναι λογικό καθώς το TimingSimpleCPU δεν είναι κατάλληλο για εξεταση επιδόσεων, αλλα για λειτουργική επαλήθευση.
+
+## Δεύτερο Μέρος
 
 Στο δεύτερο μέρος θα χρησιμοποιηθεί ο gem5 για simulation από διάφορα έτοιμα benchmarks. Ta benchmarks αυτά είναι
 
@@ -98,7 +101,7 @@ Caches : 2 Levels
 
 Όλα τα runs έγιναν με instruction cap 100000000 ώστε να μήν παίρνουν οι εκτελέσεις υπερβολικά πολύ χρόνο.
 
-#### Αρχικές προσομοιώσεις των Benchmarks
+### Αρχικές προσομοιώσεις των Benchmarks
 
 Για την εξαγωγή των χαρακτηριστικών που μας ενδιαφέρουν κατασκευάζεται .ini αρχείο που λειτουργεί συμπληρωματικά με το read_results.sh script. To .ini αρχείο δίνεται παρακάτω.
 ```
@@ -183,75 +186,88 @@ benchmark_results.txt
 Από τα παραπάνω μπορούμε να πούμε πως το simulation time είναι ανάλογο του clock speed. To cpi είναι αντιστρόφως ανάλογο του clock speed. 
 Τα miss rates για L1 instruction, data και L2 cache είναι ανεξάρτητα του clock speed. Τα παραπάνω είναι αναμενόμενα. 
 
-#### Design Exploration
+### Design Exploration
 
-Για την διευκολύνση του design exploration κατασκευάζεται script ωστε να αυτοματοποιηθεί η διαδικασία εκτέλεσης των workloads και συλλογής δεδομένων.
+Για την διευκολύνση του design exploration κατασκευάζεται script ωστε να αυτοματοποιηθεί η διαδικασία εκτέλεσης των workloads και συλλογής δεδομένων. Το παρακάτω bash script ορίζει πίνακες με τις τιμές για κάθε parameter και 
+εκτελεί τις προσομειώσεις σε for loop. Κάθε επανάληψη παίρνει τιμές από τους πίνακες για τις παραμέτρους και στο τέλος κάθε επανάληψης τρέχει το read_results.sh. Επιπλέον για κάθε επανάληψη ελέγχονται οι συνθήκες για το μέγεθος των cache. 
+Συγκεκριμένα, απαιτούμε το μέγεθος της L1 Cache να είναι μικρότερο των 256kB και της L2 Cache να είναι μικρότερο των 4ΜΒ. Εάν δεν ικανοποιούνται, τερματίζει το script.
 
 ```
 #!/bin/bash
 
-#run serially all specs with specified configuration then run read_results.sh
+#run serially all specs with specified configurations and run read_results.sh
 
-usage="give in order 
-l1d_cache size in kB
-l1i_cache size in kB
-l2_cache size in kB
-l1i_cache assoc
-l1d_cache assoc
-l2_cache assoc
-cacheline size
-cpu_clock speed in GHz
-Run all 5 specs with specified configuration the nread results
-"
 
-if [ $1 = "-h" ]; then
-    echo "$usage"
-    exit 0
-fi
+# | Παράμετρος 			| Configuration1 | Configuration2 | Configuration3 | Configuration4 | Configuration5 | Configuration6 |
+# | l1d_cache_size (kB) 	| 64 | 32 | 32 | 32 | 32 | 32 |
+# | l1i_cache_size (kB) 	| 128 | 64 | 64 | 64 | 64 | 64 |
+# | l2_cache_size (kB) 		| 2048 | 4096 | 2048 | 2048 | 2048 | 2048 |
+# | l1i_cache_assoc 		| 2 | 2 | 4 | 2 | 2 | 2 | 
+# | l1d_cache_assoc 		| 2 | 2 | 4 | 2 | 2 | 2 |
+# | l2_cache_assoc 		| 8 | 8 | 8 | 16 | 8 | 8 |
+# | cacheline 			| 64 | 64 | 64 | 64 | 128 | 64 |
+# | cpu_clock (GHz) 		| 2 | 2 | 2 | 2 | 2 | 3 |
 
-l1d_cache_size=$1
-l1i_cache_size=$2
-l2_cache_size=$3
-l1i_cache_assoc=$4
-l1d_cache_assoc=$5
-l2_cache_assoc=$6
-cacheline=$7
-cpu_clock=$8
 
-if [$l1d_cache_size + $l1i_cache_size > 256]; then
-	echo "Total l1 memory cant exceed 256kB"
-	exit 0
-fi
+# Configuration table as arrays
+l1d_cache_sizes=(64 32 32 32 32 32)
+l1i_cache_sizes=(128 64 64 64 64 64)
+l2_cache_sizes=(2048 4096 2048 2048 2048 2048)
+l1i_cache_assocs=(2 2 4 2 2 2)
+l1d_cache_assocs=(2 2 4 2 2 2)
+l2_cache_assocs=(8 8 8 16 8 8)
+cachelines=(64 64 64 64 128 64)
+cpu_clocks=(2 2 2 2 2 3)
 
-if [$l2_cache_size > 4094]; then
-	echo "l2 memory cant exceed 4MB"
-	exit 0
-fi
+# Run simulations for each configuration
+for i in "${!l1d_cache_sizes[@]}"; do
+    	# Extract configuration values
+    	l1d_cache_size=${l1d_cache_sizes[i]}
+    	l1i_cache_size=${l1i_cache_sizes[i]}
+    	l2_cache_size=${l2_cache_sizes[i]}
+    	l1i_cache_assoc=${l1i_cache_assocs[i]}
+    	l1d_cache_assoc=${l1d_cache_assocs[i]}
+	l2_cache_assoc=${l2_cache_assocs[i]}
+    	cacheline=${cachelines[i]}
+	cpu_clock=${cpu_clocks[i]}
 
-results_name=l1d${l1d_cache_size}_l1i${l1i_cache_size}_l2${l2_cache_size}_l1iassoc${l1i_cache_assoc}_l1iassoc${l1d_cache_assoc}_l2assoc${l2_cache_assoc}_cacheline${cacheline}_cpu_clock${cpu_clock}
-echo "Results will be saved to: $results_name"
+	if [$l1d_cache_size + $l1i_cache_size > 256]; then
+		echo "Total l1 memory cant exceed 256kB"
+		exit 0
+	fi
 
-./build/ARM/gem5.opt -d spec_results/specbzip configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB --l2_size=${l2_cache_size}MB \
---l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz -c spec_cpu2006/470.lbm/src/speclibm -o \
-	"spec_cpu2006/401.bzip2/data/input.program 10" -I 100000000
+	if [$l2_cache_size > 4094]; then
+		echo "l2 memory cant exceed 4MB"
+		exit 0
+	fi
 
-./build/ARM/gem5.opt -d spec_results/specmcf configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB --l2_size=${l2_cache_size}kB \
---l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz -c spec_cpu2006/429.mcf/src/specmcf -o \
-	"spec_cpu2006/429.mcf/data/inp.in" -I 100000000
 
-./build/ARM/gem5.opt -d spec_results/spechmmer configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB --l2_size=${l2_cache_size}kB \
---l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz -c spec_cpu2006/456.hmmer/src/spechmmer -o \
-	"--fixed 0 --mean 325 --num 45000 --sd 200 --seed 0 spec_cpu2006/456.hmmer/data/bombesin.hmm" -I 100000000
+	results_name=l1d${l1d_cache_size}_l1i${l1i_cache_size}_l2${l2_cache_size}_l1iassoc${l1i_cache_assoc}_l1iassoc${l1d_cache_assoc}_l2assoc${l2_cache_assoc}_cacheline${cacheline}_cpu_clock${cpu_clock}
+	echo "Results will be saved to: $results_name"
 
-./build/ARM/gem5.opt -d spec_results/specsjeng configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB --l2_size=${l2_cache_size}kB \
---l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz -c spec_cpu2006/458.sjeng/src/specsjeng -o \
-	"spec_cpu2006/458.sjeng/data/test.txt" -I 100000000
-
-./build/ARM/gem5.opt -d spec_results/speclibm configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB --l2_size=${l2_cache_size}kB \
---l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz -c spec_cpu2006/470.lbm/src/speclibm -o \
-	"20 spec_cpu2006/470.lbm/data/lbm.in0\ 1 spec_cpu2006/470.lbm/data/100_100_130_cf_a.of" -I 100000000
-
-bash read_results.sh read_results.ini spec_results/results_$results_name.txt
+	./build/ARM/gem5.opt -d spec_results/specbzip configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB \
+	--l2_size=${l2_cache_size}kB --l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz \
+	-c spec_cpu2006/401.bzip2/src/specbzip -o "spec_cpu2006/401.bzip2/data/input.program 10" -I 100000000
+	wait
+	./build/ARM/gem5.opt -d spec_results/specmcf configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB \
+	--l2_size=${l2_cache_size}kB --l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz \
+	-c spec_cpu2006/429.mcf/src/specmcf -o "spec_cpu2006/429.mcf/data/inp.in" -I 100000000
+	wait
+	./build/ARM/gem5.opt -d spec_results/spechmmer configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB \
+	--l2_size=${l2_cache_size}kB --l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz \
+	-c spec_cpu2006/456.hmmer/src/spechmmer -o "--fixed 0 --mean 325 --num 45000 --sd 200 --seed 0 spec_cpu2006/456.hmmer/data/bombesin.hmm" -I 100000000
+	wait
+	./build/ARM/gem5.opt -d spec_results/specsjeng configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB \
+	--l2_size=${l2_cache_size}kB --l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz \
+	-c spec_cpu2006/458.sjeng/src/specsjeng -o "spec_cpu2006/458.sjeng/data/test.txt" -I 100000000
+	wait
+	./build/ARM/gem5.opt -d spec_results/speclibm configs/example/se.py --cpu-type=MinorCPU --caches --l2cache --l1d_size=${l1d_cache_size}kB --l1i_size=${l1i_cache_size}kB \
+	--l2_size=${l2_cache_size}kB --l1i_assoc=$l1i_cache_assoc --l1d_assoc=$l1d_cache_assoc --l2_assoc=$l2_cache_assoc --cacheline_size=$cacheline --cpu-clock=${cpu_clock}GHz \
+	-c spec_cpu2006/470.lbm/src/speclibm -o "20 spec_cpu2006/470.lbm/data/lbm.in 0 1 spec_cpu2006/470.lbm/data/100_100_130_cf_a.of" -I 100000000
+	wait
+	bash read_results.sh read_results.ini spec_results/results_$results_name.txt
+	wait
+done
 ```
 
 Εξετάζονται τα παρακάτω configuration:
@@ -267,4 +283,37 @@ bash read_results.sh read_results.ini spec_results/results_$results_name.txt
 | cacheline | 64 | 64 | 64 | 64 | 128 | 64 |
 | cpu_clock (GHz) | 2 | 2 | 2 | 2 | 2 | 3 |
 
+Τα παραπάνω configurations επιλέχθηκαν, αλλάζοντας ένα στοιχείο τη φορά. Για παράδειγμα το μέγεθος της L1 cache (μαζί Instruction και Data cache). Η επιλογή των τιμών 
+Προκύπτουν τα αποτελέσματα.
+![image](https://github.com/user-attachments/assets/e2f0d76d-a396-473e-a0a3-30b1d3dce0c7)
 
+Τα αποτελέσματα για διπλασιασμό των μεγεθών των caches ή του associativity αυτών φαίνεται πως δεν αλλάζουν σημαντικά. Η αύξηση του CPU clock speed οπώς είδαμε προηγουμένως χειροτέρεψε το CPI, ωστόσο μπορεί να βελτιώνει το runtime. 
+Τη μεγαλύτερη επίδραση την είχε ο διπλασιασμός του Cacheline size. Αυτό είναι αναμενόμενο, καθώς διπλασιάσαμε τα chunks μνήμης που κάνει access ο επεξεργαστής. Τέλος, φαίνεται πως για τα διάφορα benchmarks οι αλλαγές στις παραμέτρους έχουν μεγαλύτερη επίδραση σε αύτα με μεγάλο CPI. Συμπεραίνουμε, πως για προγράμματα με χαμήλο, δηλαδή καλύτερο CPI, η αύξηση των παραμέτρων είναι κοστοβόρα.
+
+## Σχέση κόστους απόδοσης
+
+Με βάση όσα προηγήθηκαν μπορεί να εξαχθεί μία σχέση κόστους απόδοσης με ορίσματα τις παραμέτρους που εξερευνήθηκαν παραπάνω. Αρχικά ας οριστούν τα κόστη κάθε παραμέτρου. 
+
+_Cost(L1 Cache) = k * L1 Cache Size + m * L1 associativity_
+
+_Cost(L2 Cache) = n * L2 Cache Size + l * L2 associativity_
+
+_Cost(Cacheline size) = j * Cacheline Size_
+
+Ξέρουμε πως οι συντελεστές για την L1 cache είναι μεγαλύτεροι από τους αντίστοιχους της L2 cache, λόγω των διαφορών στη σχεδίαση των δύο επιπέδων cache. Το cacheline size είναι όπως είδαμε πολύ σημαντικό και μπορεί να βελτιώσει πολύ την απόδοση. Είναι επίσης και κοστοβόρο καθώς απαιτεί επιπλέον υλικό για την μετακίνηση μεγαλύτερων chunk δεδομένων. Επιπλέον αυτές οι μετακινήσεις επιβαρύνουν και την κατανάλωση ενέργειας και αυξάνουν την πολυπλοκότητα της σχεδίασης. Είδαμε πως για διαφορετικά benchmarks είχε διαφορές στην βελτίωση της απόδοσης. Αυτό έχει να κάνει με τις ιδιαιτερότητες κάθε προγράμματος. Όταν υπάρχουν πολλά cache misses και επιπλέον τα δεδομένα που θέλουμε να "πάμε" στον επεξεργαστή είναι μεγάλα (πχ. double float) θέλουμε μεγάλο μέγεθος cache. Για εφαρμογές με δεδομένα μικρού μεγέθους και μικρού αριθμού cache miss rate (πχ. specbzip benchmark), δεν αξίζει η αύξηση του μεγέθους cacheline.
+
+Επιπλέον η επίδραση των παραμέτρων στην ταχύτητα και απόδοση του κυκλώματος μπορεί να μοντελοποιηθεί με παρόμοιο τρόπο.
+
+
+_Performance(L1 Cache) = a * L1 Cache Size + b * L1 associativity_
+
+_Performance(L2 Cache) = c * L2 Cache Size + d * L2 associativity_
+
+_Performance(Cacheline size) = e * Cacheline Size_
+
+Παρομοίως, ξέρουμε πως _a > c_ και _b > d_. Δηλαδή, οι αλλαγές στην L1 cache έχουν μεγαλύτερη επίδραση στην επίδοση του επεξεργαστή. Το ζήτημα για τον σχεδιαστή είναι ο προσδιορισμός της σχέσης των συντελεστών κόστους απόδοσης. Για διαφορετικά προβλήματα αλλάζει η σχέση αυτή. Παραδείγματος χάριν, για προβλήματα μικρού μεγέθους δεδομένων ο συντελεστής οι συντελεστές k και n υπερτερούν των a και c αντιστοιχα.
+
+## Συμπεράσματα 
+
+Εξετάστηκαν διάφορα προγράμματα στον προσομοιωτή gem5. Εξήχθησαν αποτελέσματα από τις προσομοιώσεις για εξαγωγή συμπερασμάτων. Κατασκευάστηκαν βοηθητικά scripts για αυτοματοποίηση της δουλείας.  
+Εξετάστηκαν διάφορα configurations και η απόδοση αυτών. Τέλος, εξήχθησαν θεωρητικά συμπεράσματα με βάση τα αποτελέσματα των προσομοιώσεων.
