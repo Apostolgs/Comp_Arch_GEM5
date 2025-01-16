@@ -151,7 +151,7 @@ benchmark_results.txt
 Επιπλέον για ορισμένα benchmarks τα miss rate είναι κατά πολύ μεγαλύτερα. Αυτό οφείλεται στην ιδιαιτερότητα του κώδικα του κάθε benchmark. 
 Το miss rate στην L2 είναι εξαιρετικά μεγάλο στα benchmarks με μεγάλο execution time. Στη συνέχεια δίνεται διάγραμμα για τα ποσοστά miss rate των διαφόρων cache.
 
-![image](https://github.com/user-attachments/assets/79de9fbf-6ebb-4eba-bc3f-face3d36214e)
+![image](https://github.com/user-attachments/assets/304ababd-41bf-47fe-ac82-9d8f93ab492a)
 Εικόνα 3. Cache Miss Rates
 
 Στη συνέχεια θα επαναληφθούν οι εκτελέσεις των benchmarks με διαφορετικά settings. Ta settings αφορούν αλλαγή στο CPU clock από 2GHz σε 1GHz και 3GHz. 
