@@ -21,10 +21,15 @@
 - 1 CPU core
 - 2 memory channels
 - No memory ranks
+
 Caches : 2 Levels
+
   L1:
-    Instrucion Cache 32kB
+  
+    Instruction Cache 32kB
+    
     Data Cache 64kB
+    
   L2: 2MB
 
 
