@@ -23,10 +23,10 @@
 - No memory ranks
 Caches : 2 Levels
   L1:
-    Instrucion Cache
-    Data Cache
-  L2
-Μνήμη : 2GB
+    Instrucion Cache 32kB
+    Data Cache 64kB
+  L2: 2MB
+
 
 Επαλήθευση από Options.py/ config.ini / config.json / stats.txt
 
